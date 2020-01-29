@@ -4,7 +4,12 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 import { getStations, getCity, City } from './api';
-import { missingCityError, unknownCityError, unknownError } from './errors';
+import {
+  missingCityError,
+  unknownCityError,
+  unknownError,
+  unsupportedFeedError,
+} from './errors';
 import { wrapAsync, wrapResponse } from './util';
 
 admin.initializeApp();
@@ -116,7 +121,7 @@ app.get(
           is_installed: true,
           is_renting: true,
           is_returning: true,
-          last_reported: stat.last_update,
+          last_reported: Math.round(stat.last_update / 1000),
         })),
       }),
     );
@@ -152,5 +157,12 @@ app.get('/:city/system_calendar.json', cityMiddleware, (_, res) => {
     }),
   );
 });
+
+const unsupportedFeed = (_, res: express.Response) => unsupportedFeedError(res);
+
+app.get('/:city/free_bike_status.json', unsupportedFeed);
+app.get('/:city/system_regions.json', unsupportedFeed);
+app.get('/:city/system_pricing_plans.json', unsupportedFeed);
+app.get('/:city/system_alerts.json', unsupportedFeed);
 
 export const gbfs = functions.region('europe-west1').https.onRequest(app);
