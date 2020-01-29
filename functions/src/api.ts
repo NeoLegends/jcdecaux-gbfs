@@ -1,5 +1,5 @@
 import * as functions from 'firebase-functions';
-import { Agent } from 'http';
+import { Agent } from 'https';
 import * as rq from 'request-promise-native';
 
 const API_KEY = functions.config().jcdecaux.apikey;
