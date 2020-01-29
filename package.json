@@ -1,0 +1,13 @@
+{
+  "name": "jcdecaux-gbfs",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Moritz Gunz <moritz.gunz@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "fix": "prettier --write 'functions/**/*.{css,json,ts,tsx,scss}'"
+  },
+  "devDependencies": {
+    "prettier": "^1.19.1"
+  }
+}
