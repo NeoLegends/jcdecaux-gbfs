@@ -8,8 +8,8 @@ export const wrapAsync = (fn: RequestHandler) => (req, res, next) => {
   }
 };
 
-export const wrapResponse = (resp: unknown) => ({
+export const wrapResponse = (resp: unknown, ttlSeconds = 0) => ({
   last_updated: Math.round(Date.now() / 1000),
-  ttl: 0,
+  ttl: ttlSeconds,
   data: resp,
 });

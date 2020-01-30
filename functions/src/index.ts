@@ -61,7 +61,7 @@ app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
           makeFeed(req.params.city, 'system_calendar'),
         ],
       },
-    }),
+    }, 3600 * 24),
   );
 });
 
@@ -139,7 +139,7 @@ app.get('/:city/system_hours.json', cityMiddleware, (_, res) => {
           end_time: '23:59:59',
         },
       ],
-    }),
+    }, 3600 * 24),
   );
 });
 
@@ -154,7 +154,7 @@ app.get('/:city/system_calendar.json', cityMiddleware, (_, res) => {
           end_day: 31,
         },
       ],
-    }),
+    }, 3600 * 24),
   );
 });
 
