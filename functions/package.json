@@ -14,6 +14,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "compression": "^1.7.4",
     "countries-and-timezones": "^2.0.5",
     "express": "^4.17.1",
     "firebase-admin": "^8.6.0",
@@ -22,6 +23,7 @@
     "request-promise-native": "^1.0.8"
   },
   "devDependencies": {
+    "@types/compression": "^1.0.1",
     "@types/countries-and-timezones": "^2.0.2",
     "@types/request": "^2.48.4",
     "@types/request-promise-native": "^1.0.17",

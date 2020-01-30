@@ -1,3 +1,4 @@
+import * as compression from 'compression';
 import * as tz from 'countries-and-timezones';
 import * as express from 'express';
 import * as functions from 'firebase-functions';
@@ -15,6 +16,7 @@ import { wrapAsync, wrapResponse } from './util';
 admin.initializeApp();
 
 const app = express();
+app.use(compression());
 
 declare global {
   namespace Express {
