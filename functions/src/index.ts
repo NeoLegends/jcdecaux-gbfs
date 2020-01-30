@@ -44,7 +44,7 @@ const cityMiddleware: express.RequestHandler = (req, res, next) => {
     });
 };
 
-app.get('/:city/gbfs.json', (req, res) => {
+app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
   const makeFeed = (city: string, feed: string) => ({
     name: feed,
     url: `https://europe-west1-jcdecaux-gbfs.cloudfunctions.net/gbfs/${city}/${feed}.json`,
