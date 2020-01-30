@@ -23,7 +23,7 @@ export interface City {
 
 export const getCity = async (city: string) => {
   const allCities = await getCities();
-  return [...allCities].find(c => c.name === city);
+  return allCities.find(c => c.name === city);
 };
 
 export const getCities = async () => {
