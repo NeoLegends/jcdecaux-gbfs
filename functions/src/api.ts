@@ -16,6 +16,10 @@ const BASE_URL = 'https://api.jcdecaux.com/vls/v1';
 const CITIES_URL = `${BASE_URL}/contracts`;
 const STATIONS_URL = `${BASE_URL}/stations`;
 
+const abuseHeaders = {
+  'User-Agent': 'jcdecaux-gbfs/v1',
+  'X-Abuse-Contact': 'jcdecaux@moritzgunz.de',
+};
 const agent = new Agent({ keepAlive: true });
 
 let cities: City[] = [];
@@ -33,6 +37,7 @@ export const getCities = async () => {
 
   cities = await rq(CITIES_URL, {
     agent,
+    headers: abuseHeaders,
     qs: { apiKey: API_KEY },
     json: true,
   });
@@ -61,6 +66,7 @@ export const getCities = async () => {
 export const getStations = async (city: string) =>
   rq(STATIONS_URL, {
     agent,
+    headers: abuseHeaders,
     qs: { apiKey: API_KEY, contract: city },
     json: true,
   });
