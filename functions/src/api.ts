@@ -2,6 +2,13 @@ import * as functions from 'firebase-functions';
 import { Agent } from 'https';
 import * as rq from 'request-promise-native';
 
+export interface City {
+  name: string;
+  commercial_name: string;
+  cities: string[];
+  country_code: string;
+}
+
 const API_KEY = functions.config().jcdecaux.apikey;
 const CITIES_REFETCH_TIMEOUT = 3600 * 1000;
 
@@ -13,13 +20,6 @@ const agent = new Agent({ keepAlive: true });
 
 let cities: City[] = [];
 let citiesLastFetched = 0;
-
-export interface City {
-  name: string;
-  commercial_name: string;
-  cities: string[];
-  country_code: string;
-}
 
 export const getCity = async (city: string) => {
   const allCities = await getCities();
