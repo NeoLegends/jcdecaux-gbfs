@@ -53,17 +53,20 @@ app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
   });
 
   return res.json(
-    wrapResponse({
-      en: {
-        feeds: [
-          makeFeed(req.params.city, 'system_information'),
-          makeFeed(req.params.city, 'station_information'),
-          makeFeed(req.params.city, 'station_status'),
-          makeFeed(req.params.city, 'system_hours'),
-          makeFeed(req.params.city, 'system_calendar'),
-        ],
+    wrapResponse(
+      {
+        en: {
+          feeds: [
+            makeFeed(req.params.city, 'system_information'),
+            makeFeed(req.params.city, 'station_information'),
+            makeFeed(req.params.city, 'station_status'),
+            makeFeed(req.params.city, 'system_hours'),
+            makeFeed(req.params.city, 'system_calendar'),
+          ],
+        },
       },
-    }, 3600 * 24),
+      3600 * 24,
+    ),
   );
 });
 
@@ -132,31 +135,37 @@ app.get(
 
 app.get('/:city/system_hours.json', cityMiddleware, (_, res) => {
   return res.json(
-    wrapResponse({
-      rental_hours: [
-        {
-          user_types: ['member'],
-          days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
-          start_time: '00:00:00',
-          end_time: '23:59:59',
-        },
-      ],
-    }, 3600 * 24),
+    wrapResponse(
+      {
+        rental_hours: [
+          {
+            user_types: ['member'],
+            days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+            start_time: '00:00:00',
+            end_time: '23:59:59',
+          },
+        ],
+      },
+      3600 * 24,
+    ),
   );
 });
 
 app.get('/:city/system_calendar.json', cityMiddleware, (_, res) => {
   return res.json(
-    wrapResponse({
-      calendars: [
-        {
-          start_month: 1,
-          start_day: 1,
-          end_month: 12,
-          end_day: 31,
-        },
-      ],
-    }, 3600 * 24),
+    wrapResponse(
+      {
+        calendars: [
+          {
+            start_month: 1,
+            start_day: 1,
+            end_month: 12,
+            end_day: 31,
+          },
+        ],
+      },
+      3600 * 24,
+    ),
   );
 });
 
