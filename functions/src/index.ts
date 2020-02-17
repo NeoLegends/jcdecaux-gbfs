@@ -119,15 +119,18 @@ app.get(
     const stations = await getStations(req.city!.name);
     return res.json(
       wrapResponse({
-        stations: stations.map(stat => ({
-          station_id: String(stat.number),
-          num_bikes_available: stat.available_bikes,
-          num_docks_available: stat.available_bike_stands,
-          is_installed: true,
-          is_renting: true,
-          is_returning: true,
-          last_reported: Math.round(stat.last_update / 1000),
-        })),
+        stations: stations.map(stat => {
+          const isEnabled = stat.status == 'OPEN' && stat.available_bike_stands > 0;
+          return {
+            station_id: String(stat.number),
+            num_bikes_available: stat.available_bikes,
+            num_docks_available: stat.available_bike_stands,
+            is_installed: true,
+            is_renting: isEnabled,
+            is_returning: isEnabled,
+            last_reported: Math.round(stat.last_update / 1000),
+          };
+        }),
       }),
     );
   }),
