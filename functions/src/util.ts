@@ -10,7 +10,7 @@ export const wrapAsync = (fn: RequestHandler) => (req, res, next) => {
   }
 };
 
-export const wrapResponse = (resp: unknown, ttlSeconds = 0) => ({
+export const wrapResponse = <T>(resp: T, ttlSeconds = 0) => ({
   last_updated: Math.round(Date.now() / 1000),
   ttl: ttlSeconds,
   data: resp,
