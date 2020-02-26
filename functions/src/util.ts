@@ -1,10 +1,12 @@
 import { RequestHandler } from 'express';
+import { unknownError } from './errors';
 
 export const wrapAsync = (fn: RequestHandler) => (req, res, next) => {
   try {
     Promise.resolve(fn(req, res, undefined!)).catch(next);
   } catch (err) {
-    next(err);
+    console.error("Error while handling a request:", err);
+    return unknownError(res);
   }
 };
 
