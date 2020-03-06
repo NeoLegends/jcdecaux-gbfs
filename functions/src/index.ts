@@ -120,7 +120,7 @@ app.get(
     return res.json(
       wrapResponse({
         stations: stations.map(stat => {
-          const isEnabled = stat.status == 'OPEN' && stat.available_bike_stands > 0;
+          const isEnabled = stat.status === 'OPEN' && stat.available_bike_stands > 0;
           return {
             station_id: String(stat.number),
             num_bikes_available: stat.available_bikes,
