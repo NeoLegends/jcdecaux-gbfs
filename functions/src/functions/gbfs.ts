@@ -215,7 +215,8 @@ app.get(
           ]
         : [];
 
-    const nextFetch = lastUpdate.toMillis() + 600 * 1000 - Date.now() + 10 * 1000;
+    // Data is valid until lastUpdate + 10min + 10s safety margin
+    const nextFetch = lastUpdate.toMillis() + (600 * 1000) - Date.now() + (10 * 1000);
     return res.json(wrapResponse({ alerts }, nextFetch / 1000));
   }),
 );
