@@ -215,7 +215,8 @@ app.get(
           ]
         : [];
 
-    return res.json(wrapResponse({ alerts }));
+    const nextFetch = lastUpdate.toMillis() + 600 * 1000 - Date.now() + 10 * 1000;
+    return res.json(wrapResponse({ alerts }, nextFetch / 1000));
   }),
 );
 
