@@ -1,3 +1,4 @@
+// tslint:disable-next-line
 import { FieldValue, Timestamp } from '@google-cloud/firestore';
 
 export interface City {
