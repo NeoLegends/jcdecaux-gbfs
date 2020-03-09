@@ -1,4 +1,3 @@
-import { Timestamp } from '@google-cloud/firestore';
 import * as compression from 'compression';
 import * as tz from 'countries-and-timezones';
 import * as express from 'express';
