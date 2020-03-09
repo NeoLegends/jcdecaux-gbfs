@@ -13,8 +13,12 @@ export const wrapAsync = (fn: RequestHandler) => (req, res, next) => {
   }
 };
 
-export const wrapResponse = <T>(resp: T, ttlSeconds = 0) => ({
-  last_updated: Math.round(Date.now() / 1000),
+export const wrapResponse = <T>(
+  resp: T,
+  ttlSeconds = 0,
+  lastUpdated = Math.round(Date.now() / 1000),
+) => ({
+  last_updated: lastUpdated,
   ttl: ttlSeconds,
   data: resp,
 });
