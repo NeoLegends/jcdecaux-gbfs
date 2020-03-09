@@ -1,6 +1,7 @@
 import * as compression from 'compression';
 import * as tz from 'countries-and-timezones';
 import * as express from 'express';
+import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
 import {
@@ -59,6 +60,7 @@ app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
             makeFeed(req.params.city, 'station_status'),
             makeFeed(req.params.city, 'system_hours'),
             makeFeed(req.params.city, 'system_calendar'),
+            makeFeed(req.params.city, 'system_alerts'),
           ],
         },
       },
@@ -169,10 +171,49 @@ app.get('/:city/system_calendar.json', cityMiddleware, (_, res) => {
   );
 });
 
+app.get(
+  '/:city/system_alerts.json',
+  cityMiddleware,
+  wrapAsync(async (req, res) => {
+    const latestAlert = await admin
+      .firestore()
+      .collection('cities')
+      .doc(req.city!.name)
+      .collection('system-alerts')
+      .orderBy('date', 'desc')
+      .limit(1)
+      .get();
+
+    if (latestAlert.empty) {
+      return res.json(wrapResponse({ alerts: [] }, 10 * 60));
+    }
+
+    const alertDoc = latestAlert.docs[0];
+    const { date, lastUpdate, stationsDown } = alertDoc.data();
+
+    const alerts =
+      stationsDown.length > 0
+        ? [
+            {
+              alert_id: alertDoc.id,
+              last_updated: (lastUpdate as FirebaseFirestore.Timestamp).seconds,
+              station_ids: stationsDown,
+              summary: `${stationsDown.join(', ')} are down.`,
+              times: {
+                start: (date as FirebaseFirestore.Timestamp).seconds,
+              },
+              type: 'STATION_CLOSURE',
+            },
+          ]
+        : [];
+
+    return res.json(wrapResponse({ alerts }));
+  }),
+);
+
 const unsupportedFeed = (_, res: express.Response) => unsupportedFeedError(res);
 
 app.get('/:city/free_bike_status.json', unsupportedFeed);
-app.get('/:city/system_alerts.json', unsupportedFeed);
 app.get('/:city/system_pricing_plans.json', unsupportedFeed);
 app.get('/:city/system_regions.json', unsupportedFeed);
 
