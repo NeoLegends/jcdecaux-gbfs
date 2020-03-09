@@ -196,6 +196,7 @@ app.get(
       lastUpdate,
       stationsDown,
     } = alertDoc.data() as SystemAlert;
+    const sortedDownStations = stationsDown.sort((a, b) => Number(a) - Number(b));
 
     const alerts =
       stationsDown.length > 0
@@ -203,10 +204,9 @@ app.get(
             {
               alert_id: alertDoc.id,
               last_updated: lastUpdate.seconds,
-              station_ids: stationsDown.sort(),
+              station_ids: sortedDownStations,
               summary:
-                description ||
-                `Stations ${stationsDown.sort().join(', ')} are down.`,
+                description || `Stations ${sortedDownStations.join(', ')} are down.`,
               times: {
                 start: date.seconds,
               },

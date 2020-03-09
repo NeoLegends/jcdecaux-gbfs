@@ -8,7 +8,7 @@ const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
   const alert: SystemAlertToInsert = {
     date: admin.firestore.FieldValue.serverTimestamp(),
     lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
-    stationsDown,
+    stationsDown: stationsDown.sort((a, b) => Number(a) - Number(b)),
   };
 
   await admin
