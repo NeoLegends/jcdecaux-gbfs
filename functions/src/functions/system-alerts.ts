@@ -2,15 +2,10 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
 import { getCities, getStations } from '../jcdecaux';
-
-export interface SystemAlert {
-  date: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue;
-  lastUpdate: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue;
-  stationsDown: string[];
-}
+import { SystemAlertToInsert } from '../types';
 
 const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
-  const alert: SystemAlert = {
+  const alert: SystemAlertToInsert = {
     date: admin.firestore.FieldValue.serverTimestamp(),
     lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
     stationsDown,

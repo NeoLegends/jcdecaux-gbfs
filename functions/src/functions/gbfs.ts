@@ -1,3 +1,4 @@
+import { Timestamp } from '@google-cloud/firestore';
 import * as compression from 'compression';
 import * as tz from 'countries-and-timezones';
 import * as express from 'express';
@@ -10,7 +11,8 @@ import {
   unknownError,
   unsupportedFeedError,
 } from '../errors';
-import { getStations, getCity, City } from '../jcdecaux';
+import { getCity, getStations } from '../jcdecaux';
+import { City, SystemAlert } from '../types';
 import { wrapAsync, wrapResponse } from '../util';
 
 const app = express();
@@ -189,18 +191,25 @@ app.get(
     }
 
     const alertDoc = latestAlert.docs[0];
-    const { date, lastUpdate, stationsDown } = alertDoc.data();
+    const {
+      date,
+      description,
+      lastUpdate,
+      stationsDown,
+    } = alertDoc.data() as SystemAlert;
 
     const alerts =
       stationsDown.length > 0
         ? [
             {
               alert_id: alertDoc.id,
-              last_updated: (lastUpdate as FirebaseFirestore.Timestamp).seconds,
-              station_ids: stationsDown,
-              summary: `${stationsDown.join(', ')} are down.`,
+              last_updated: lastUpdate.seconds,
+              station_ids: stationsDown.sort(),
+              summary:
+                description ||
+                `Stations ${stationsDown.sort().join(', ')} are down.`,
               times: {
-                start: (date as FirebaseFirestore.Timestamp).seconds,
+                start: date.seconds,
               },
               type: 'STATION_CLOSURE',
             },
