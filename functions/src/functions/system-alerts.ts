@@ -3,6 +3,7 @@ import * as functions from 'firebase-functions';
 
 import { getCities, getStations } from '../jcdecaux';
 import { SystemAlertToInsert } from '../types';
+import { setsEqual } from '../util';
 
 const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
   const alert: SystemAlertToInsert = {
@@ -47,10 +48,7 @@ const processCity = async (city: string) => {
     latestAlert.docs[0].data().stationsDown,
   );
 
-  if (
-    stationsNowDown.size !== stationsPreviouslyDown.size ||
-    ![...stationsPreviouslyDown].every(sId => stationsNowDown.has(sId))
-  ) {
+  if (!setsEqual(stationsNowDown, stationsPreviouslyDown)) {
     await generateCurrentAlert(city, [...stationsNowDown]);
     return;
   }
