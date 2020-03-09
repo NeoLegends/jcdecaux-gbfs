@@ -35,7 +35,7 @@ const processCity = async (city: string) => {
 
   const stationsNowDown = new Set(
     stations
-      .filter(stat => stat.status === 'CLOSED' || stat.available_bike_stands <= 0)
+      .filter(stat => stat.status === 'CLOSED')
       .map(stat => String(stat.number)),
   );
 
