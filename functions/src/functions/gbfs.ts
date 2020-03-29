@@ -229,4 +229,7 @@ app.get('/:city/free_bike_status.json', unsupportedFeed);
 app.get('/:city/system_pricing_plans.json', unsupportedFeed);
 app.get('/:city/system_regions.json', unsupportedFeed);
 
-export const gbfs = functions.region('europe-west1').https.onRequest(app);
+export const gbfs = functions
+  .region('europe-west1')
+  .runWith({ memory: '128MB' })
+  .https.onRequest(app);

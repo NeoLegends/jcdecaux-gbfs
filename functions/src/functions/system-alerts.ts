@@ -60,6 +60,7 @@ const processCity = async (city: string) => {
 
 export const generateSystemAlerts = functions
   .region('europe-west1')
+  .runWith({ memory: '128MB' })
   .pubsub.schedule('every 10 minutes')
   .onRun(async () => {
     const cities = await getCities();
