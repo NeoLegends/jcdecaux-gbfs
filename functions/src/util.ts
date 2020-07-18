@@ -20,5 +20,6 @@ export const wrapResponse = <T>(
 ) => ({
   last_updated: lastUpdated,
   ttl: ttlSeconds,
+  version: '2.1',
   data: resp,
 });

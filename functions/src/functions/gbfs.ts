@@ -3,6 +3,7 @@ import * as tz from 'countries-and-timezones';
 import * as express from 'express';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
+import { v4 } from 'uuid';
 
 import {
   missingCityError,
@@ -24,6 +25,8 @@ declare global {
     }
   }
 }
+
+const BIKE_TYPE_ID = 'bike';
 
 const cityMiddleware: express.RequestHandler = (req, res, next) => {
   if (!req.params.city) {
@@ -62,6 +65,7 @@ app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
             makeFeed(req.params.city, 'system_hours'),
             makeFeed(req.params.city, 'system_calendar'),
             makeFeed(req.params.city, 'system_alerts'),
+            makeFeed(req.params.city, 'vehicle_types'),
           ],
         },
       },
@@ -84,6 +88,7 @@ app.get('/:city/system_information.json', cityMiddleware, (req, res) => {
       system_id: req.params.city,
       language: 'en',
       name: req.city!.commercial_name,
+      feed_contact_email: 'jcdecaux@moritzgunz.de',
       operator: 'JCDecaux',
       timezone: tzData.timezones[0],
     }),
@@ -106,6 +111,7 @@ app.get(
             ? ['TRANSITCARD', 'KEY', 'CREDITCARD', 'APPLEPAY', 'ANDROIDPAY']
             : ['TRANSITCARD', 'KEY'],
           capacity: stat.bike_stands,
+          is_virtual_station: false,
         })),
       }),
     );
@@ -121,14 +127,26 @@ app.get(
       wrapResponse({
         stations: stations.map(stat => {
           const isEnabled = stat.status === 'OPEN';
+
           return {
             station_id: String(stat.number),
-            num_bikes_available: stat.available_bikes,
-            num_docks_available: stat.available_bike_stands,
+            count: stat.available_bike_stands,
             is_installed: true,
             is_renting: isEnabled,
             is_returning: isEnabled,
             last_reported: Math.round(stat.last_update / 1000),
+            num_bikes_available: stat.available_bikes,
+            num_docks_available: stat.available_bike_stands,
+            vehicle_docks_available: {
+              [BIKE_TYPE_ID]: stat.available_bike_stands,
+            },
+            vehicle_type_ids: [BIKE_TYPE_ID],
+            vehicles: Array.from(new Array(stat.available_bikes)).map(() => ({
+              bike_id: v4(),
+              is_reserved: false,
+              is_disabled: false,
+              vehicle_type_id: BIKE_TYPE_ID,
+            })),
           };
         }),
       }),
@@ -221,6 +239,20 @@ app.get(
       wrapResponse({ alerts }, Math.round(nextFetch / 1000), lastUpdate.seconds),
     );
   }),
+);
+
+app.get('/:city/vehicle_types.json', (_, res) =>
+  res.json(
+    wrapResponse({
+      vehicle_types: [
+        {
+          vehicle_type_id: BIKE_TYPE_ID,
+          form_factor: 'bicycle',
+          propulsion_type: 'human',
+        },
+      ],
+    }),
+  ),
 );
 
 const unsupportedFeed = (_, res: express.Response) => unsupportedFeedError(res);
