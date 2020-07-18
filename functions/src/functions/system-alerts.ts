@@ -1,9 +1,9 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import * as admin from "firebase-admin";
+import * as functions from "firebase-functions";
 
-import { getCities, getStations } from '../jcdecaux';
-import { SystemAlertToInsert } from '../types';
-import { setsEqual } from '../util';
+import { getCities, getStations } from "../jcdecaux";
+import { SystemAlertToInsert } from "../types";
+import { setsEqual } from "../util";
 
 const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
   const alert: SystemAlertToInsert = {
@@ -14,9 +14,9 @@ const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
 
   await admin
     .firestore()
-    .collection('cities')
+    .collection("cities")
     .doc(city)
-    .collection('system-alerts')
+    .collection("system-alerts")
     .add(alert);
 };
 
@@ -25,18 +25,18 @@ const processCity = async (city: string) => {
     getStations(city),
     admin
       .firestore()
-      .collection('cities')
+      .collection("cities")
       .doc(city)
-      .collection('system-alerts')
-      .orderBy('date', 'desc')
+      .collection("system-alerts")
+      .orderBy("date", "desc")
       .limit(1)
       .get(),
   ]);
 
   const stationsNowDown = new Set(
     stations
-      .filter(stat => stat.status === 'CLOSED')
-      .map(stat => String(stat.number)),
+      .filter((stat) => stat.status === "CLOSED")
+      .map((stat) => String(stat.number)),
   );
 
   if (latestAlert.empty) {
@@ -59,9 +59,9 @@ const processCity = async (city: string) => {
 };
 
 export const generateSystemAlerts = functions
-  .region('europe-west1')
-  .runWith({ memory: '128MB' })
-  .pubsub.schedule('every 10 minutes')
+  .region("europe-west1")
+  .runWith({ memory: "128MB" })
+  .pubsub.schedule("every 10 minutes")
   .onRun(async () => {
     const cities = await getCities();
     for (const city of cities) {

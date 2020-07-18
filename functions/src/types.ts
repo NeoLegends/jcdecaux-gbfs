@@ -1,5 +1,5 @@
 // tslint:disable-next-line
-import { FieldValue, Timestamp } from '@google-cloud/firestore';
+import { FieldValue, Timestamp } from "@google-cloud/firestore";
 
 export interface City {
   name: string;
@@ -20,7 +20,7 @@ export interface Station {
     lat: number;
     lng: number;
   };
-  status: 'OPEN' | 'CLOSED';
+  status: "OPEN" | "CLOSED";
 }
 
 export interface SystemAlert {

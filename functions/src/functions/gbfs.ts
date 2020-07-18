@@ -1,19 +1,19 @@
-import * as compression from 'compression';
-import * as tz from 'countries-and-timezones';
-import * as express from 'express';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
-import { v4 } from 'uuid';
+import * as compression from "compression";
+import * as tz from "countries-and-timezones";
+import * as express from "express";
+import * as admin from "firebase-admin";
+import * as functions from "firebase-functions";
+import { v4 } from "uuid";
 
 import {
   missingCityError,
   unknownCityError,
   unknownError,
   unsupportedFeedError,
-} from '../errors';
-import { getCity, getStations } from '../jcdecaux';
-import { City, SystemAlert } from '../types';
-import { wrapAsync, wrapResponse } from '../util';
+} from "../errors";
+import { getCity, getStations } from "../jcdecaux";
+import { City, SystemAlert } from "../types";
+import { wrapAsync, wrapResponse } from "../util";
 
 const app = express();
 app.use(compression());
@@ -26,7 +26,7 @@ declare global {
   }
 }
 
-const BIKE_TYPE_ID = 'bike';
+const BIKE_TYPE_ID = "bike";
 
 const cityMiddleware: express.RequestHandler = (req, res, next) => {
   if (!req.params.city) {
@@ -34,7 +34,7 @@ const cityMiddleware: express.RequestHandler = (req, res, next) => {
   }
 
   return getCity(req.params.city)
-    .then(city => {
+    .then((city) => {
       if (!city) {
         return unknownCityError(req.params.city, res);
       }
@@ -42,13 +42,13 @@ const cityMiddleware: express.RequestHandler = (req, res, next) => {
       req.city = city;
       next();
     })
-    .catch(err => {
-      console.error('Error while fetching city:', err);
+    .catch((err) => {
+      console.error("Error while fetching city:", err);
       return unknownError(res);
     });
 };
 
-app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
+app.get("/:city/gbfs.json", cityMiddleware, (req, res) => {
   const makeFeed = (city: string, feed: string) => ({
     name: feed,
     url: `https://europe-west1-jcdecaux-gbfs.cloudfunctions.net/gbfs/${city}/${feed}.json`,
@@ -59,13 +59,13 @@ app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
       {
         en: {
           feeds: [
-            makeFeed(req.params.city, 'system_information'),
-            makeFeed(req.params.city, 'station_information'),
-            makeFeed(req.params.city, 'station_status'),
-            makeFeed(req.params.city, 'system_hours'),
-            makeFeed(req.params.city, 'system_calendar'),
-            makeFeed(req.params.city, 'system_alerts'),
-            makeFeed(req.params.city, 'vehicle_types'),
+            makeFeed(req.params.city, "system_information"),
+            makeFeed(req.params.city, "station_information"),
+            makeFeed(req.params.city, "station_status"),
+            makeFeed(req.params.city, "system_hours"),
+            makeFeed(req.params.city, "system_calendar"),
+            makeFeed(req.params.city, "system_alerts"),
+            makeFeed(req.params.city, "vehicle_types"),
           ],
         },
       },
@@ -74,7 +74,7 @@ app.get('/:city/gbfs.json', cityMiddleware, (req, res) => {
   );
 });
 
-app.get('/:city/system_information.json', cityMiddleware, (req, res) => {
+app.get("/:city/system_information.json", cityMiddleware, (req, res) => {
   const tzData = tz.getCountry(req.city!.country_code);
   if (!tzData) {
     console.error(
@@ -86,30 +86,30 @@ app.get('/:city/system_information.json', cityMiddleware, (req, res) => {
   return res.json(
     wrapResponse({
       system_id: req.params.city,
-      language: 'en',
+      language: "en",
       name: req.city!.commercial_name,
-      feed_contact_email: 'jcdecaux@moritzgunz.de',
-      operator: 'JCDecaux',
+      feed_contact_email: "jcdecaux@moritzgunz.de",
+      operator: "JCDecaux",
       timezone: tzData.timezones[0],
     }),
   );
 });
 
 app.get(
-  '/:city/station_information.json',
+  "/:city/station_information.json",
   cityMiddleware,
   wrapAsync(async (req, res) => {
     const stations = await getStations(req.city!.name);
     return res.json(
       wrapResponse({
-        stations: stations.map(stat => ({
+        stations: stations.map((stat) => ({
           station_id: String(stat.number),
           name: stat.address,
           lat: stat.position.lat,
           lon: stat.position.lng,
           rental_methods: stat.banking
-            ? ['TRANSITCARD', 'KEY', 'CREDITCARD', 'APPLEPAY', 'ANDROIDPAY']
-            : ['TRANSITCARD', 'KEY'],
+            ? ["TRANSITCARD", "KEY", "CREDITCARD", "APPLEPAY", "ANDROIDPAY"]
+            : ["TRANSITCARD", "KEY"],
           capacity: stat.bike_stands,
           is_virtual_station: false,
         })),
@@ -119,14 +119,14 @@ app.get(
 );
 
 app.get(
-  '/:city/station_status.json',
+  "/:city/station_status.json",
   cityMiddleware,
   wrapAsync(async (req, res) => {
     const stations = await getStations(req.city!.name);
     return res.json(
       wrapResponse({
-        stations: stations.map(stat => {
-          const isEnabled = stat.status === 'OPEN';
+        stations: stations.map((stat) => {
+          const isEnabled = stat.status === "OPEN";
 
           return {
             station_id: String(stat.number),
@@ -154,16 +154,16 @@ app.get(
   }),
 );
 
-app.get('/:city/system_hours.json', cityMiddleware, (_, res) => {
+app.get("/:city/system_hours.json", cityMiddleware, (_, res) => {
   return res.json(
     wrapResponse(
       {
         rental_hours: [
           {
-            user_types: ['member'],
-            days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
-            start_time: '00:00:00',
-            end_time: '23:59:59',
+            user_types: ["member"],
+            days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+            start_time: "00:00:00",
+            end_time: "23:59:59",
           },
         ],
       },
@@ -172,7 +172,7 @@ app.get('/:city/system_hours.json', cityMiddleware, (_, res) => {
   );
 });
 
-app.get('/:city/system_calendar.json', cityMiddleware, (_, res) => {
+app.get("/:city/system_calendar.json", cityMiddleware, (_, res) => {
   return res.json(
     wrapResponse(
       {
@@ -191,15 +191,15 @@ app.get('/:city/system_calendar.json', cityMiddleware, (_, res) => {
 });
 
 app.get(
-  '/:city/system_alerts.json',
+  "/:city/system_alerts.json",
   cityMiddleware,
   wrapAsync(async (req, res) => {
     const latestAlert = await admin
       .firestore()
-      .collection('cities')
+      .collection("cities")
       .doc(req.city!.name)
-      .collection('system-alerts')
-      .orderBy('date', 'desc')
+      .collection("system-alerts")
+      .orderBy("date", "desc")
       .limit(1)
       .get();
 
@@ -224,11 +224,11 @@ app.get(
               last_updated: lastUpdate.seconds,
               station_ids: sortedDownStations,
               summary:
-                description || `Stations ${sortedDownStations.join(', ')} are down.`,
+                description || `Stations ${sortedDownStations.join(", ")} are down.`,
               times: {
                 start: date.seconds,
               },
-              type: 'STATION_CLOSURE',
+              type: "STATION_CLOSURE",
             },
           ]
         : [];
@@ -241,14 +241,14 @@ app.get(
   }),
 );
 
-app.get('/:city/vehicle_types.json', (_, res) =>
+app.get("/:city/vehicle_types.json", (_, res) =>
   res.json(
     wrapResponse({
       vehicle_types: [
         {
           vehicle_type_id: BIKE_TYPE_ID,
-          form_factor: 'bicycle',
-          propulsion_type: 'human',
+          form_factor: "bicycle",
+          propulsion_type: "human",
         },
       ],
     }),
@@ -257,11 +257,11 @@ app.get('/:city/vehicle_types.json', (_, res) =>
 
 const unsupportedFeed = (_, res: express.Response) => unsupportedFeedError(res);
 
-app.get('/:city/free_bike_status.json', unsupportedFeed);
-app.get('/:city/system_pricing_plans.json', unsupportedFeed);
-app.get('/:city/system_regions.json', unsupportedFeed);
+app.get("/:city/free_bike_status.json", unsupportedFeed);
+app.get("/:city/system_pricing_plans.json", unsupportedFeed);
+app.get("/:city/system_regions.json", unsupportedFeed);
 
 export const gbfs = functions
-  .region('europe-west1')
-  .runWith({ memory: '128MB' })
+  .region("europe-west1")
+  .runWith({ memory: "128MB" })
   .https.onRequest(app);
