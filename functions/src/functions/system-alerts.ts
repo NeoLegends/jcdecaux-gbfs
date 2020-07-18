@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
 import { getCities, getStations } from "../jcdecaux";
-import { SystemAlertToInsert } from "../types";
+import { SystemAlert, SystemAlertToInsert } from "../types";
 import { setsEqual } from "../util";
 
 const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
@@ -20,17 +20,25 @@ const generateCurrentAlert = async (city: string, stationsDown: string[]) => {
     .add(alert);
 };
 
+const getLatestSystemAlert = async (
+  city: string,
+): Promise<[FirebaseFirestore.DocumentReference, SystemAlert] | null> => {
+  const snap = await admin
+    .firestore()
+    .collection("cities")
+    .doc(city)
+    .collection("system-alerts")
+    .orderBy("date", "desc")
+    .limit(1)
+    .get();
+
+  return !snap.empty ? [snap.docs[0].ref, snap.docs[0].data() as SystemAlert] : null;
+};
+
 const processCity = async (city: string) => {
-  const [stations, latestAlert] = await Promise.all([
+  const [stations, alertResult] = await Promise.all([
     getStations(city),
-    admin
-      .firestore()
-      .collection("cities")
-      .doc(city)
-      .collection("system-alerts")
-      .orderBy("date", "desc")
-      .limit(1)
-      .get(),
+    getLatestSystemAlert(city),
   ]);
 
   const stationsNowDown = new Set(
@@ -39,21 +47,20 @@ const processCity = async (city: string) => {
       .map((stat) => String(stat.number)),
   );
 
-  if (latestAlert.empty) {
+  if (!alertResult) {
     await generateCurrentAlert(city, [...stationsNowDown]);
     return;
   }
 
-  const stationsPreviouslyDown = new Set<string>(
-    latestAlert.docs[0].data().stationsDown,
-  );
+  const [latestAlertRef, latestAlert] = alertResult;
+  const stationsPreviouslyDown = new Set<string>(latestAlert.stationsDown);
 
   if (!setsEqual(stationsNowDown, stationsPreviouslyDown)) {
     await generateCurrentAlert(city, [...stationsNowDown]);
     return;
   }
 
-  await latestAlert.docs[0].ref.update({
+  await latestAlertRef.update({
     lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
   });
 };
