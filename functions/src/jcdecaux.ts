@@ -58,10 +58,13 @@ export const getCities = async () => {
   return cities;
 };
 
-export const getStations = async (city: string): Promise<Station[]> =>
-  rq(STATIONS_URL, {
+export const getStations = async (city: string): Promise<Station[]> => {
+  const stations: Station[] = await rq(STATIONS_URL, {
     agent,
     headers: abuseHeaders,
     qs: { apiKey: API_KEY, contract: city },
     json: true,
   });
+  stations.sort((a, b) => a.number - b.number);
+  return stations;
+};
